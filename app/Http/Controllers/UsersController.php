@@ -11,7 +11,7 @@ class UsersController extends Controller
     public function index()
     {
         // ユーザ一覧をidの降順で取得
-        $users=User::orderBy('id','desc')->paginate(1);
+        $users=User::orderBy('id','desc')->paginate(2);
         
         // ユーザー覧ビューでそれを表示
         return view('users.index',[
@@ -20,12 +20,59 @@ class UsersController extends Controller
     }    
     public function show($id)
     {
-    //idの値でユーザを検索して取得
-    $user=User::findOrFail($id);
-    
-    //ユーザ詳細ビューでそれを表示
-    return view('users.show',[
-        'user'=>$user,
+        //idの値でユーザを検索して取得
+        $user=User::findOrFail($id);
+        
+        //関係するモデルの件数をロード
+        $user->loadRelationshipCounts();
+        
+        //ユーザ投稿の一覧を作成日時の降順で取得
+        $microposts=$user->microposts()->orderBy('created_at','desc')->paginate(2);
+        
+        //ユーザ詳細ビューでそれらを表示
+        return view('users.show',[
+            'user'=>$user,
+            'microposts'=>$microposts,
         ]);
-    }  
+    }
+    
+    //ユーザのフォロー一覧を表示
+    public function followings($id) //$idはルーターからきたもの
+    {
+        // idの値でユーザを検索して取得
+        $user=User::findOrFail($id);
+        
+        //関係するモデルの件数をロード
+        $user->loadRelationshipCounts(); 
+        
+        //ユーザのフォロー一覧を取得
+        $followings=$user->followings()->paginate(2);
+        
+        //フォロー一覧ビューへデータを運び表示
+        return view('users.followings',[
+            'user'=>$user,
+            'users'=>$followings,
+        ]);
+    }
+    
+    //ユーザのフォロワー一覧を表示
+    public function followers($id)
+    {
+        // idの値でユーザを検索して取得
+        $user=User::findOrFail($id);
+        
+        //関係するモデルの件数をロード
+        $user->loadRelationshipCounts();
+        
+        //ユーザのフォロワー一覧を取得
+        $followers=$user->followers()->paginate(10);
+        
+        //フォロワー一覧ビューへデータを運び表示
+        return view('users.followers',[
+            'user'=>$user,
+            'users'=>$followers,
+        ]);
+    }
 }
+
+
