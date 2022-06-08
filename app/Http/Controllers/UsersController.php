@@ -46,7 +46,7 @@ class UsersController extends Controller
         $user->loadRelationshipCounts(); 
         
         //ユーザのフォロー一覧を取得
-        $followings=$user->followings()->paginate(2);
+        $followings=$user->followings()->paginate(10);
         
         //フォロー一覧ビューへデータを運び表示
         return view('users.followings',[
